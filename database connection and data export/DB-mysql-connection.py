@@ -1,13 +1,52 @@
 import mysql.connector, csv
 from mysql.connector import errorcode
 
+# ---------------------------------------------------------- 
+# This script shows you how to connect to a MySQL database, 
+# extract data from the database, then write it back to the
+# database as well
+# ---------------------------------------------------------- 
+
+# ******************************** 
+# General variables
+# ******************************** 
+file_name = r'C:/Destination'
+table_name = 'schema.table'
+
 try:
-	
 	# ******************************** 
-	# Add test data
+	# Connect to MySQL database
 	# ******************************** 
 	cnx = mysql.connector.connect(user='user', database='database')
 	
+	# ******************************** 
+	# Extract data from database 
+	# ******************************** 
+	extract_sql = ("SELECT * FROM %s" % table_name)
+	
+	cursor1 = cnx.cursor()
+	cursor1.execute(extract_sql)
+	
+	with open(file_name, 'w', newline='') as csv_file:
+		csv_writer = csv.writer(csv_file)
+		csv_writer.writerow([i[0] for i in cursor1.description]) # write headers
+		csv_writer.writerows(cursor1)
+	
+	cnx.commit()
+	csv_file.close()
+	cursor1.close()
+	
+	# ****************************************  
+	# Remove original data - ONLY AS DESIRED
+	# **************************************** 
+	#cursor2 = cnx.cursor()
+	#cursor2.execute('DELETE FROM %s'%table_name)
+	#cnx.commit()
+	#cursor2.close()
+	
+	# ******************************** 
+	# Write data to database 
+	# ******************************** 
 	insert_sql = (
 		"LOAD DATA INFILE '%s' "
 		"INTO TABLE %s "
@@ -18,36 +57,10 @@ try:
 		"IGNORE 1 ROWS"
 		)
 	
-	# ******************************** 
-	# Extract data from database 
-	# ******************************** 
-	file_name = r'C:/Destination'
-	table_name = 'schema.table'
-	
-	cursor1 = cnx.cursor()
-	extract_sql = ("SELECT * FROM %s" % table_name) 
-	cursor1.execute(extract_sql)
-	
-	with open(file_name, 'w', newline='') as csv_file:
-		csv_writer = csv.writer(csv_file)
-		csv_writer.writerow([i[0] for i in cursor1.description]) # write headers
-		csv_writer.writerows(cursor1)
-	
+	cursor3 = cnx.cursor()
+	cursor3.execute(insert_sql % (file_name,table_name))
 	cnx.commit()
-	csv_file.close()
-	
-	#cursor1.execute('DELETE FROM %s'%table_name) #testing only
-	#cnx.commit() #testing only
-	
-	cursor1.close()
-	
-	# ******************************** 
-	# Write data to database 
-	# ******************************** 
-	cursor2 = cnx.cursor()
-	cursor2.execute(insert_sql % (file_name,table_name))
-	cnx.commit()
-	cursor2.close()
+	cursor3.close()
 	
 	# ******************************** 
 	# Close connections 

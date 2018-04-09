@@ -1,3 +1,8 @@
+# ----------------------------------------------------------- 
+# This script parses a file  to find specific letters. I used 
+# the representative letters for DNA for fun.
+# ----------------------------------------------------------- 
+
 from sys import argv
 script, filename = argv
 
