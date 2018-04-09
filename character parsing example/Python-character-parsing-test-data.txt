@@ -1,0 +1,6 @@
+g       a       
+    t ---------      c
+                  g
+
+a   t           c 11111       a        g       
+tc          tc       a   777  g
